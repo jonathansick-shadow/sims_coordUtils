@@ -426,7 +426,7 @@ class AstrometryBase(object):
             return raOut,decOut, alt, az
     
     def correctCoordinates(self, pm_ra = None, pm_dec = None, parallax = None, v_rad = None, 
-             includeRefraction = True):
+             includeRefraction = True, inDegrees = True):
         """
         correct coordinates for all possible effects.
         
@@ -460,7 +460,14 @@ class AstrometryBase(object):
                      
         ra_out, dec_out = self.applyMeanObservedPlace(ra_apparent, dec_apparent, MJD = mjd,
                                                    includeRefraction = includeRefraction)
-
+        
+        
+        if inDegrees:
+            degPerRadian = 180.0/numpy.pi
+            ra_out = ra_out * degPerRadian
+            dec_out = dec_out * degPerRadian
+        
+        
         return numpy.array([ra_out,dec_out])       
     
 
