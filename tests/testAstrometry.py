@@ -41,7 +41,7 @@ import lsst.utils.tests as utilsTests
 
 from lsst.sims.catalogs.measures.instance import InstanceCatalog
 from lsst.sims.catalogs.generation.db import DBObject, ObservationMetaData
-from lsst.sims.coordUtils.Astrometry import AstrometryStars
+from lsst.sims.coordUtils.Astrometry import AstrometryStars, AstrometryGalaxies
 from lsst.sims.catalogs.measures.instance.Site import Site
 
 class testDefaults(object):
@@ -81,14 +81,26 @@ class testDefaults(object):
         return out
 
 
-class testCatalog(InstanceCatalog,AstrometryStars,testDefaults):
+class testStarCatalog(InstanceCatalog,AstrometryStars,testDefaults):
     """
     A (somewhat meaningless) instance catalog class that will allow us
     to run the astrometry routines for testing purposes
     """
     catalog_type = 'test_stars'
-    column_outputs=['id','raTrim','decTrim','raObserved','decObserved',
+    column_outputs=['id','raTrim','decTrim','raObserved','decObserved',\
+                   'raTrimDeg','decTrimDeg','raObservedDeg','decObservedDeg',\
                    'x_focal','y_focal']
+
+class testGalaxyCatalog(InstanceCatalog,AstrometryGalaxies,testDefaults):
+    """
+    A (somewhat meaningless) instance catalog class that will allow us
+    to run the astrometry routines for testing purposes
+    """
+    catalog_type = 'test_galaxies'
+    column_outputs=['galid','raTrim','decTrim','raObserved','decObserved',\
+                   'raTrimDeg','decTrimDeg','raObservedDeg','decObservedDeg',\
+                   'x_focal','y_focal']
+
 
 class astrometryUnitTest(unittest.TestCase):
     """
@@ -100,7 +112,7 @@ class astrometryUnitTest(unittest.TestCase):
     """
 
     starDBObject = DBObject.from_objid('msstars')
-    obs_metadata=ObservationMetaData(mjd=50984.371741, circ_bounds=dict(ra=200., dec=-30, radius=1.))
+    obs_metadata=ObservationMetaData(mjd=50984.371741, circ_bounds=dict(ra=200., dec=-30, radius=0.1))
     obs_metadata.metadata={}
     
     #below are metadata values that need to be set in order for 
@@ -112,8 +124,31 @@ class astrometryUnitTest(unittest.TestCase):
     obs_metadata.metadata['Unrefracted_Dec'] = -30.0*numpy.pi/180.0
     obs_metadata.metadata['Opsim_rotskypos'] = 1.0
     
-    cat=testCatalog(starDBObject,obs_metadata=obs_metadata)    
+    cat=testStarCatalog(starDBObject,obs_metadata=obs_metadata)    
     tol=1.0e-5
+    
+    def testWritingStarCatalog(self):
+        dbObj=DBObject.from_objid('rrlystars')
+        obs_metadata_pointed=ObservationMetaData(mjd=2013.23, circ_bounds=dict(ra=200., dec=-30, radius=1.))
+        obs_metadata_pointed.metadata = {}
+        obs_metadata_pointed.metadata['Opsim_filter'] = 'i'
+        obs_metadata_pointed.metadata['Unrefracted_RA'] = 200.0*numpy.pi/180.0
+        obs_metadata_pointed.metadata['Unrefracted_Dec'] = -30.0*numpy.pi/180.0
+        obs_metadata_pointed.metadata['Opsim_rotskypos'] = 1.0
+        test_cat=testStarCatalog(dbObj,obs_metadata=obs_metadata_pointed)
+        test_cat.write_catalog("testStarsOutput.txt")
+    
+    def testWrtingGalaxies(self):
+        dbObj=DBObject.from_objid('galaxyBase')
+        obs_metadata_pointed=ObservationMetaData(mjd=50000.0, circ_bounds=dict(ra=0., dec=0., radius=0.01))
+        obs_metadata_pointed.metadata = {}
+        obs_metadata_pointed.metadata['Opsim_filter'] = 'i'
+        obs_metadata_pointed.metadata['Unrefracted_RA'] = 0.0
+        obs_metadata_pointed.metadata['Unrefracted_Dec'] = 0.0
+        obs_metadata_pointed.metadata['Opsim_rotskypos'] = 1.0
+        test_cat=testGalaxyCatalog(dbObj,obs_metadata=obs_metadata_pointed)
+        test_cat.write_catalog("testGalaxiesOutput.txt")
+
     
     def testPassingOfSite(self):
         """
@@ -125,7 +160,7 @@ class astrometryUnitTest(unittest.TestCase):
               xPolar=2.4, yPolar=1.4, meanTemperature=314.0, \
               meanPressure=800.0,meanHumidity=0.9, lapseRate=0.01)
         
-        cat2=testCatalog(self.starDBObject,obs_metadata=self.obs_metadata,site=testSite)
+        cat2=testStarCatalog(self.starDBObject,obs_metadata=self.obs_metadata,site=testSite)
         
         self.assertEqual(cat2.site.longitude,10.0)
         self.assertEqual(cat2.site.latitude,20.0)

@@ -605,8 +605,12 @@ class AstrometryGalaxies(AstrometryBase):
 
     @compound('raTrim','decTrim')
     def get_trimCoordinates(self):
-        return self.correctCoordinates(includeRefraction = False)    
+        return self.correctCoordinates(includeRefraction = False, inDegrees = False)    
         
+    
+    @compound('raTrimDeg','decTrimDeg')
+    def get_trimCoordinatesDegrees(self):
+        return self.correctCoordinates(includeRefraction = False)
     
     @compound('raObserved','decObserved')
     def get_observedCoordinates(self):
@@ -614,6 +618,10 @@ class AstrometryGalaxies(AstrometryBase):
         get coordinates corrected for everything
         """
         
+        return self.correctCoordinates(inDegrees = False)
+    
+    @compound('raObservedDeg','decObservedDeg')
+    def get_observedCoordinatesDegrees(self):
         return self.correctCoordinates()
     
 
@@ -622,7 +630,7 @@ class AstrometryStars(AstrometryBase):
     This mixin contains a getter for the corrected RA and dec which takes account of proper motion and parallax
     """
 
-    def correctStellarCoordinates(self, includeRefraction = True):
+    def correctStellarCoordinates(self, includeRefraction = True, inDegrees = True):
         """
         Getter which coorrects RA and Dec for propermotion, radial velocity, and parallax
    
@@ -633,13 +641,21 @@ class AstrometryStars(AstrometryBase):
         rv=self.column_by_name('radialVelocity') #in km/s; positive if receding
         
         return self.correctCoordinates(pm_ra = pr, pm_dec = pd, parallax = px, v_rad = rv, 
-                     includeRefraction = includeRefraction)
+                     includeRefraction = includeRefraction, inDegrees = inDegrees)
            
      
     @compound('raTrim','decTrim')
     def get_trimCoordinates(self):
+        return self.correctStellarCoordinates(includeRefraction = False, inDegrees = False)
+    
+    @compound('raTrimDeg','decTrimDeg')
+    def get_trimCoordinatesDegrees(self):
         return self.correctStellarCoordinates(includeRefraction = False)
     
     @compound('raObserved','decObserved')
     def get_observedCoordinates(self):
+        return self.correctStellarCoordinates(inDegrees = False)
+    
+    @compound('raObservedDeg','decObservedDeg')
+    def get_observedCoordinatesDegrees(self):
         return self.correctStellarCoordinates()
