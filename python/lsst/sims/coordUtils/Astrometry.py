@@ -425,8 +425,8 @@ class AstrometryBase(object):
         else:
             return raOut,decOut, alt, az
     
-    def correctCoordinates(self, pm_ra = None, pm_dec = None, parallax = None, v_rad = None, 
-             includeRefraction = True):
+    def correctCoordinates(self, ra, dec, pm_ra = None, pm_dec = None, 
+             parallax = None, v_rad = None, includeRefraction = True):
         """
         correct coordinates for all possible effects.
         
@@ -448,9 +448,6 @@ class AstrometryBase(object):
         @param [out] dec_out Dec corrected for all included effects
         
         """
-        
-        ra=self.column_by_name('raJ2000') #in radians
-        dec=self.column_by_name('decJ2000') #in radians
         
         ep0 = self.db_obj.epoch
         mjd = self.obs_metadata.mjd
@@ -600,7 +597,9 @@ class AstrometryGalaxies(AstrometryBase):
 
     @compound('raTrim','decTrim')
     def get_trimCoordinates(self):
-        return self.correctCoordinates(includeRefraction = False)    
+        ra_in = self.column_by_name('raJ2000')
+        dec_in = self.column_by_name('decJ2000')
+        return self.correctCoordinates(ra_in, dec_in, includeRefraction = False)    
         
     
     @compound('raObserved','decObserved')
@@ -609,9 +608,48 @@ class AstrometryGalaxies(AstrometryBase):
         get coordinates corrected for everything
         """
         
-        return self.correctCoordinates()
-    
+        ra_in = self.column_by_name('raJ2000')
+        dec_in = self.column_by_name('decJ2000')
+        
+        return self.correctCoordinates(ra_in, dec_in)
 
+    @compound('x_focal_disk','y_focal_disk')
+    def get_skyToFocalPlaneDisk(self):
+        """
+        This getter will convert dra and ddec (the ra and dec of the disk) to
+        focal plane coordinates
+        """    
+        
+        ra_in = self.column_by_name('dra')
+        dec_in = self.column_by_name('ddec')
+        
+        return self.convertToFocalPlane(ra_in, dec_in)
+
+    @compound('x_focal_agn','y_focal_agn')
+    def get_skyToFocalPlaneAgn(self):
+        """
+        This getter will convert agnra and agndec (the ra and dec of the agn) to
+        focal plane coordinates
+        """
+        
+        ra_in = self.column_by_name('agnra')
+        dec_in = self.column_by_name('agndec')
+        
+        return self.convertToFocalPlane(ra_in, dec_in)
+    
+    @compound('x_focal_bulge','y_focal_bulge')
+    def get_skyToFocalPlaneBulge(self):
+        """
+        This getter will convert bra and bdec (the ra and dec of the bulge) to
+        focal plane coordinates
+        """
+        
+        ra_in = self.column_by_name('bra')
+        dec_in = self.column_by_name('bdec')
+        
+        return self.convertToFocalPlane(ra_in, dec_in)
+    
+        
 class AstrometryStars(AstrometryBase): 
     """
     This mixin contains a getter for the corrected RA and dec which takes account of proper motion and parallax
@@ -627,8 +665,11 @@ class AstrometryStars(AstrometryBase):
         px=self.column_by_name('parallax') #in arcseconds
         rv=self.column_by_name('radialVelocity') #in km/s; positive if receding
         
-        return self.correctCoordinates(pm_ra = pr, pm_dec = pd, parallax = px, v_rad = rv, 
-                     includeRefraction = includeRefraction)
+        ra_in = self.column_by_name('raJ2000')
+        dec_in = self.column_by_name('decJ2000')
+        
+        return self.correctCoordinates(ra_in, dec_in, pm_ra = pr, pm_dec = pd, parallax = px, 
+                     v_rad = rv, includeRefraction = includeRefraction)
            
      
     @compound('raTrim','decTrim')
