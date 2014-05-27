@@ -544,18 +544,13 @@ class AstrometryBase(object):
         
         sinpa = math.sin(az)*math.cos(self.site.latitude)/math.cos(dec)
         return math.asin(sinpa)
-    
-    @compound('x_focal','y_focal')    
-    def get_skyToFocalPlane(self):
+      
+    def convertToFocalPlane(self,ra_in,dec_in):
         """
         Take an input RA and dec from the sky and convert it to coordinates
         on the focal plane
         """
         
-        ra_in = self.column_by_name('raObserved')
-        dec_in = self.column_by_name('decObserved')
-        
-
         x_out=numpy.zeros(len(ra_in))
         y_out=numpy.zeros(len(ra_in))
         
@@ -566,10 +561,10 @@ class AstrometryBase(object):
         #correct for precession and nutation
         apparentRA=[]
         apparentDec=[]
-        inRA=[self.obs_metadata.metadata['Unrefracted_RA']]
-        inDec=[self.obs_metadata.metadata['Unrefracted_Dec']]
+        pointingRA=[self.obs_metadata.metadata['Unrefracted_RA']]
+        pointingDec=[self.obs_metadata.metadata['Unrefracted_Dec']]
        
-        x, y = self.applyMeanApparentPlace(inRA, inDec, 
+        x, y = self.applyMeanApparentPlace(pointingRA, pointingDec, 
                    Epoch0 = self.db_obj.epoch, MJD = self.obs_metadata.mjd)
                    
         #correct for refraction
@@ -590,7 +585,14 @@ class AstrometryBase(object):
             y_out[i] = x*numpy.sin(theta) + y*numpy.cos(theta)
 
         return numpy.array([x_out,y_out])
-
+        
+    @compound('x_focal','y_focal')
+    def get_skyToFocalPlane(self):
+        ra_in = self.column_by_name('raObserved')
+        dec_in = self.column_by_name('decObserved')
+            
+        return self.convertToFocalPlane(ra_in,dec_in)
+        
 class AstrometryGalaxies(AstrometryBase):
     """
     This mixin contains a getter for the corrected RA and dec which ignores parallax and proper motion
