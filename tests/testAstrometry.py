@@ -96,8 +96,10 @@ class testGalaxyCatalog(InstanceCatalog,AstrometryGalaxies,testDefaults):
     to run the astrometry routines for testing purposes
     """
     catalog_type = 'test_galaxies'
-    column_outputs=['galid','raTrim','decTrim','raObserved','decObserved',\
-                   'x_focal','y_focal']
+    column_outputs=['galid','raTrim','decTrim','raObserved','decObserved',
+                   'x_focal','y_focal','x_focal_bulge','y_focal_bulge',
+                   'x_focal_disk','y_focal_disk','x_focal_agn','y_focal_agn',
+                   'dra','bra','agnra','raJ2000','decJ2000']
 
 
 class astrometryUnitTest(unittest.TestCase):

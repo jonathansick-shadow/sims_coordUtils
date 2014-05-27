@@ -568,18 +568,28 @@ class AstrometryBase(object):
         trueRA, trueDec = self.applyMeanObservedPlace(x, y, MJD = self.obs_metadata.mjd)
         #we should now have the true tangent point for the gnomonic projection
         
+        failure = -999.0
+        
         for i in range(len(ra_in)):
             
             #pal.ds2tp performs the gnomonic projection on ra_in and dec_in
             #with a tangent point at trueRA and trueDec
             #
-            x, y = pal.ds2tp(ra_in[i], dec_in[i],trueRA[0],trueDec[0])
+            #If the star is too far from the pointing RA/DEC, palpy will raise
+            #an exception, in which case, we will just assign -999 to both
+            #focal plane coordinates
+            #
+            try:
+                x, y = pal.ds2tp(ra_in[i], dec_in[i],trueRA[0],trueDec[0])
 
-            #rotate the result by rotskypos (rotskypos being "the angle of the sky relative to
-            #camera cooridnates" according to phoSim documentation) to account for
-            #the rotation of the focal plane about the telescope pointing      
-            x_out[i] = x*numpy.cos(theta) - y*numpy.sin(theta)
-            y_out[i] = x*numpy.sin(theta) + y*numpy.cos(theta)
+                #rotate the result by rotskypos (rotskypos being "the angle of the sky relative to
+                #camera cooridnates" according to phoSim documentation) to account for
+                #the rotation of the focal plane about the telescope pointing      
+                x_out[i] = x*numpy.cos(theta) - y*numpy.sin(theta)
+                y_out[i] = x*numpy.sin(theta) + y*numpy.cos(theta)
+            except:
+                x_out[i] = failure
+                y_out[i] = failure
 
         return numpy.array([x_out,y_out])
         
@@ -623,7 +633,9 @@ class AstrometryGalaxies(AstrometryBase):
         ra_in = self.column_by_name('dra')
         dec_in = self.column_by_name('ddec')
         
-        return self.convertToFocalPlane(ra_in, dec_in)
+        ra_true,dec_true = self.correctCoordinates(ra_in, dec_in,includeRefraction = True)
+        
+        return self.convertToFocalPlane(ra_true, dec_true)
 
     @compound('x_focal_agn','y_focal_agn')
     def get_skyToFocalPlaneAgn(self):
@@ -635,7 +647,9 @@ class AstrometryGalaxies(AstrometryBase):
         ra_in = self.column_by_name('agnra')
         dec_in = self.column_by_name('agndec')
         
-        return self.convertToFocalPlane(ra_in, dec_in)
+        ra_true, dec_true = self.correctCoordinates(ra_in, dec_in, includeRefraction = True)
+        
+        return self.convertToFocalPlane(ra_true, dec_true)
     
     @compound('x_focal_bulge','y_focal_bulge')
     def get_skyToFocalPlaneBulge(self):
@@ -647,7 +661,9 @@ class AstrometryGalaxies(AstrometryBase):
         ra_in = self.column_by_name('bra')
         dec_in = self.column_by_name('bdec')
         
-        return self.convertToFocalPlane(ra_in, dec_in)
+        ra_true, dec_true = self.correctCoordinates(ra_in, dec_in, includeRefraction = True)
+        
+        return self.convertToFocalPlane(ra_true, dec_true)
     
         
 class AstrometryStars(AstrometryBase): 
