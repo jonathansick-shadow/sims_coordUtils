@@ -97,9 +97,10 @@ class testGalaxyCatalog(InstanceCatalog,AstrometryGalaxies,testDefaults):
     """
     catalog_type = 'test_galaxies'
     column_outputs=['galid','raTrim','decTrim','raObserved','decObserved',
-                   'x_focal','y_focal','x_focal_bulge','y_focal_bulge',
-                   'x_focal_disk','y_focal_disk','x_focal_agn','y_focal_agn',
-                   'dra','bra','agnra','raJ2000','decJ2000']
+                   'x_focal','y_focal',
+                   'DiskHalfLightRadius','BulgeHalfLightRadius',
+                   'inc_bulge_deg','inc_disk_deg','a_b','b_b',
+                   'a_d','b_d']
 
 
 class astrometryUnitTest(unittest.TestCase):

@@ -628,6 +628,9 @@ class AstrometryGalaxies(AstrometryBase):
         """
         This getter will convert dra and ddec (the ra and dec of the disk) to
         focal plane coordinates
+        
+        This does not actually look like it should be used; dra and ddec are not
+        populated in the database
         """    
         
         ra_in = self.column_by_name('dra')
@@ -642,6 +645,9 @@ class AstrometryGalaxies(AstrometryBase):
         """
         This getter will convert agnra and agndec (the ra and dec of the agn) to
         focal plane coordinates
+        
+        This does not actually looke like it should be used; agnra and agndec are not
+        populated in the data base
         """
         
         ra_in = self.column_by_name('agnra')
@@ -656,6 +662,9 @@ class AstrometryGalaxies(AstrometryBase):
         """
         This getter will convert bra and bdec (the ra and dec of the bulge) to
         focal plane coordinates
+        
+        This does not actually look like it should be used;  bra and bdec are not populated
+        in the data base
         """
         
         ra_in = self.column_by_name('bra')
