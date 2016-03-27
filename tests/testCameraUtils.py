@@ -11,20 +11,21 @@ from lsst.sims.utils import ObservationMetaData, radiansFromArcsec, arcsecFromRa
 from lsst.sims.coordUtils.utils import ReturnCamera
 from lsst.sims.utils import pupilCoordsFromRaDec, observedFromICRS
 from lsst.sims.coordUtils import chipNameFromRaDec, \
-                                 chipNameFromPupilCoords, \
-                                 _chipNameFromRaDec
+    chipNameFromPupilCoords, \
+    _chipNameFromRaDec
 
 from lsst.sims.coordUtils import pixelCoordsFromPupilCoords, \
-                                 pixelCoordsFromRaDec, \
-                                 _pixelCoordsFromRaDec
+    pixelCoordsFromRaDec, \
+    _pixelCoordsFromRaDec
 
 from lsst.sims.coordUtils import focalPlaneCoordsFromPupilCoords, \
-                                 focalPlaneCoordsFromRaDec, \
-                                 _focalPlaneCoordsFromRaDec
+    focalPlaneCoordsFromRaDec, \
+    _focalPlaneCoordsFromRaDec
 
 from lsst.sims.coordUtils import pupilCoordsFromPixelCoords
 
 from lsst.sims.coordUtils import raDecFromPixelCoords, _raDecFromPixelCoords
+
 
 class ChipNameTest(unittest.TestCase):
 
@@ -37,7 +38,6 @@ class ChipNameTest(unittest.TestCase):
     def setUp(self):
         numpy.random.seed(45532)
 
-
     def testRuns(self):
         """
         Test that chipName runs, and that the various iterations of that method
@@ -46,7 +46,7 @@ class ChipNameTest(unittest.TestCase):
         nStars = 100
         ra0 = 45.0
         dec0 = -112.0
-        rotSkyPos=135.0
+        rotSkyPos = 135.0
         mjd = 42350.0
         obs = ObservationMetaData(pointingRA=ra0, pointingDec=dec0,
                                   mjd=mjd, rotSkyPos=rotSkyPos)
@@ -55,8 +55,8 @@ class ChipNameTest(unittest.TestCase):
         decList = (numpy.random.random_sample(nStars)-0.5)*1000.0/3600.0 + dec0
 
         xpList, ypList = pupilCoordsFromRaDec(raList, decList,
-                                                   obs_metadata=obs,
-                                                   epoch=2000.0)
+                                              obs_metadata=obs,
+                                              epoch=2000.0)
 
         names1 = chipNameFromRaDec(raList, decList,
                                    obs_metadata=obs,
@@ -83,7 +83,6 @@ class ChipNameTest(unittest.TestCase):
 
         self.assertGreater(isNotNone, 0)
 
-
     def testExceptions(self):
         """
         Test that exceptions are raised when they should be
@@ -100,34 +99,34 @@ class ChipNameTest(unittest.TestCase):
         with self.assertRaises(RuntimeError) as context:
             chipNameFromPupilCoords(xpList, ypList)
         self.assertEqual('No camera defined.  Cannot run chipName.',
-                          context.exception.message)
+                         context.exception.message)
 
         with self.assertRaises(RuntimeError) as context:
             chipNameFromRaDec(xpList, ypList, obs_metadata=obs, epoch=2000.0)
         self.assertEqual('No camera defined.  Cannot run chipName.',
-                          context.exception.message)
+                         context.exception.message)
 
         with self.assertRaises(RuntimeError) as context:
             _chipNameFromRaDec(xpList, ypList, obs_metadata=obs, epoch=2000.0)
         self.assertEqual('No camera defined.  Cannot run chipName.',
-                          context.exception.message)
+                         context.exception.message)
 
         # verify that an exception is raised if you do not pass in a numpy array
         with self.assertRaises(RuntimeError) as context:
             chipNameFromPupilCoords(list(xpList), ypList)
         self.assertEqual(context.exception.message,
-                         'You need to pass numpy arrays of ' \
+                         'You need to pass numpy arrays of '
                          + 'xPupil and yPupil to chipNameFromPupilCoords')
 
         with self.assertRaises(RuntimeError) as context:
             _chipNameFromRaDec(list(xpList), ypList, obs_metadata=obs, epoch=2000.0)
         self.assertEqual(context.exception.message,
-                        'You need to pass numpy arrays of RA and Dec to chipName')
+                         'You need to pass numpy arrays of RA and Dec to chipName')
 
         with self.assertRaises(RuntimeError) as context:
             chipNameFromPupilCoords(xpList, list(ypList))
         self.assertEqual(context.exception.message,
-                         'You need to pass numpy arrays of ' \
+                         'You need to pass numpy arrays of '
                          + 'xPupil and yPupil to chipNameFromPupilCoords')
 
         with self.assertRaises(RuntimeError) as context:
@@ -138,30 +137,28 @@ class ChipNameTest(unittest.TestCase):
         # the conversion from degrees to radians that happens inside that
         # method automatically casts lists as numpy arrays
 
-
         # verify that an exception is raised if the two coordinate arrays contain
         # different numbers of elements
         xpDummy = numpy.random.random_sample(nStars/2)
         with self.assertRaises(RuntimeError) as context:
             chipNameFromPupilCoords(xpDummy, ypList, camera=self.camera)
         self.assertEqual(context.exception.message,
-                         'You passed %d xPupils and ' % (nStars/2) \
+                         'You passed %d xPupils and ' % (nStars/2)
                          + '%d yPupils to chipName.' % nStars)
 
         with self.assertRaises(RuntimeError) as context:
             chipNameFromRaDec(xpDummy, ypList, obs_metadata=obs, epoch=2000.0,
-                                  camera=self.camera)
+                              camera=self.camera)
         self.assertEqual(context.exception.message,
-                         'You passed %d RAs and ' % (nStars/2) \
+                         'You passed %d RAs and ' % (nStars/2)
                          + '%d Decs to chipName.' % nStars)
 
         with self.assertRaises(RuntimeError) as context:
             _chipNameFromRaDec(xpDummy, ypList, obs_metadata=obs, epoch=2000.0,
-                                   camera=self.camera)
+                               camera=self.camera)
         self.assertEqual(context.exception.message,
-                         'You passed %d RAs and ' % (nStars/2) \
+                         'You passed %d RAs and ' % (nStars/2)
                          + '%d Decs to chipName.' % nStars)
-
 
         # verify that an exception is raised if you call chipNameFromRaDec
         # without an epoch
@@ -193,13 +190,13 @@ class ChipNameTest(unittest.TestCase):
                                        rotSkyPos=112.0)
         with self.assertRaises(RuntimeError) as context:
             chipNameFromRaDec(xpList, ypList, epoch=2000.0, obs_metadata=obsDummy,
-                                  camera=self.camera)
+                              camera=self.camera)
         self.assertEqual(context.exception.message,
                          'You need to pass an ObservationMetaData with an mjd into chipName')
 
         with self.assertRaises(RuntimeError) as context:
             _chipNameFromRaDec(xpList, ypList, epoch=2000.0, obs_metadata=obsDummy,
-                                  camera=self.camera)
+                               camera=self.camera)
         self.assertEqual(context.exception.message,
                          'You need to pass an ObservationMetaData with an mjd into chipName')
 
@@ -209,16 +206,15 @@ class ChipNameTest(unittest.TestCase):
                                        mjd=52350.0)
         with self.assertRaises(RuntimeError) as context:
             chipNameFromRaDec(xpList, ypList, epoch=2000.0, obs_metadata=obsDummy,
-                                  camera=self.camera)
+                              camera=self.camera)
         self.assertEqual(context.exception.message,
                          'You need to pass an ObservationMetaData with a rotSkyPos into chipName')
 
         with self.assertRaises(RuntimeError) as context:
             _chipNameFromRaDec(xpList, ypList, epoch=2000.0, obs_metadata=obsDummy,
-                                  camera=self.camera)
+                               camera=self.camera)
         self.assertEqual(context.exception.message,
                          'You need to pass an ObservationMetaData with a rotSkyPos into chipName')
-
 
     def testNaNbecomesNone(self):
         """
@@ -228,7 +224,7 @@ class ChipNameTest(unittest.TestCase):
         nStars = 100
         ra0 = 45.0
         dec0 = -112.0
-        rotSkyPos=135.0
+        rotSkyPos = 135.0
         mjd = 42350.0
         obs = ObservationMetaData(pointingRA=ra0, pointingDec=dec0,
                                   mjd=mjd, rotSkyPos=rotSkyPos)
@@ -248,10 +244,10 @@ class ChipNameTest(unittest.TestCase):
                                                   epoch=2000.0)
 
             names1 = chipNameFromRaDec(raList, decList, obs_metadata=obs, epoch=2000.0,
-                                            camera=self.camera)
+                                       camera=self.camera)
 
             names2 = _chipNameFromRaDec(numpy.radians(raList), numpy.radians(decList),
-                                            obs_metadata=obs, epoch=2000.0, camera=self.camera)
+                                        obs_metadata=obs, epoch=2000.0, camera=self.camera)
 
             names3 = chipNameFromPupilCoords(xpList, ypList, camera=self.camera)
 
@@ -279,7 +275,6 @@ class PixelCoordTest(unittest.TestCase):
 
     def setUp(self):
         numpy.random.seed(11324)
-
 
     def testConsistency(self):
         """
@@ -325,7 +320,6 @@ class PixelCoordTest(unittest.TestCase):
                                              camera=self.camera, includeDistortion=includeDistortion,
                                              chipNames=chipNameList)
 
-
             numpy.testing.assert_array_equal(xx1, xx2)
             numpy.testing.assert_array_equal(xx1, xx3)
             numpy.testing.assert_array_equal(xx1, xx4)
@@ -354,7 +348,6 @@ class PixelCoordTest(unittest.TestCase):
 
             self.assertGreater(ctNaN, 0)
             self.assertGreater(ctNotNaN, 0)
-
 
     def testExceptions(self):
         """
@@ -393,21 +386,20 @@ class PixelCoordTest(unittest.TestCase):
         self.assertEqual(context.exception.message,
                          'Camera not specified.  Cannot calculate pixel coordinates.')
 
-
         # test that an exception is raised when you pass in something
         # that is not a numpy array
         with self.assertRaises(RuntimeError) as context:
             pixelCoordsFromPupilCoords(list(xpList), ypList,
                                        camera=self.camera)
         self.assertEqual(context.exception.message,
-                         'You need to pass numpy arrays of xPupil and yPupil ' \
+                         'You need to pass numpy arrays of xPupil and yPupil '
                          + 'to pixelCoordsFromPupilCoords')
 
         with self.assertRaises(RuntimeError) as context:
             pixelCoordsFromPupilCoords(xpList, list(ypList),
                                        camera=self.camera)
         self.assertEqual(context.exception.message,
-                         'You need to pass numpy arrays of xPupil and yPupil ' \
+                         'You need to pass numpy arrays of xPupil and yPupil '
                          + 'to pixelCoordsFromPupilCoords')
 
         with self.assertRaises(RuntimeError) as context:
@@ -417,7 +409,7 @@ class PixelCoordTest(unittest.TestCase):
                                   epoch=2000.0,
                                   camera=self.camera)
         self.assertEqual(context.exception.message,
-                         'You need to pass numpy arrays of RA and Dec ' \
+                         'You need to pass numpy arrays of RA and Dec '
                          + 'to pixelCoordsFromRaDec')
 
         with self.assertRaises(RuntimeError) as context:
@@ -427,12 +419,11 @@ class PixelCoordTest(unittest.TestCase):
                                   epoch=2000.0,
                                   camera=self.camera)
         self.assertEqual(context.exception.message,
-                         'You need to pass numpy arrays of RA and Dec ' \
+                         'You need to pass numpy arrays of RA and Dec '
                          + 'to pixelCoordsFromRaDec')
         # do not need to run the above test on pixelCoordsFromRaDec,
         # because the conversion from degrees to radians  that happens
         # inside that method automatically casts lists as numpy arrays
-
 
         # test that an exception is raised if you pass in mis-matched
         # input arrays
@@ -440,7 +431,7 @@ class PixelCoordTest(unittest.TestCase):
             pixelCoordsFromPupilCoords(xpList, ypList[0:10],
                                        camera=self.camera)
         self.assertEqual(context.exception.message,
-                         'You passed 100 xPupil and 10 yPupil coordinates ' \
+                         'You passed 100 xPupil and 10 yPupil coordinates '
                          + 'to pixelCoordsFromPupilCoords')
 
         with self.assertRaises(RuntimeError) as context:
@@ -449,7 +440,7 @@ class PixelCoordTest(unittest.TestCase):
                                  epoch=2000.0,
                                  camera=self.camera)
         self.assertEqual(context.exception.message,
-                         'You passed 100 RA and 10 Dec coordinates ' \
+                         'You passed 100 RA and 10 Dec coordinates '
                          'to pixelCoordsFromRaDec')
 
         with self.assertRaises(RuntimeError) as context:
@@ -459,15 +450,14 @@ class PixelCoordTest(unittest.TestCase):
                                   epoch=2000.0,
                                   camera=self.camera)
         self.assertEqual(context.exception.message,
-                         'You passed 100 RA and 10 Dec coordinates ' \
+                         'You passed 100 RA and 10 Dec coordinates '
                          'to pixelCoordsFromRaDec')
-
 
         # test that an error is raised if you pass an incorrect
         # number of chipNames to pixelCoordsFromPupilCoords
         with self.assertRaises(RuntimeError) as context:
             pixelCoordsFromPupilCoords(xpList, ypList, chipNames=['Det22']*10,
-                                 camera=self.camera)
+                                       camera=self.camera)
         self.assertEqual(context.exception.message,
                          'You passed 100 points but 10 chipNames to pixelCoordsFromPupilCoords')
 
@@ -496,7 +486,7 @@ class PixelCoordTest(unittest.TestCase):
                                  camera=self.camera,
                                  obs_metadata=obs)
         self.assertEqual(context.exception.message,
-                         'You need to pass an epoch into ' \
+                         'You need to pass an epoch into '
                          + 'pixelCoordsFromRaDec')
 
         with self.assertRaises(RuntimeError) as context:
@@ -504,7 +494,7 @@ class PixelCoordTest(unittest.TestCase):
                                   camera=self.camera,
                                   obs_metadata=obs)
         self.assertEqual(context.exception.message,
-                         'You need to pass an epoch into ' \
+                         'You need to pass an epoch into '
                          + 'pixelCoordsFromRaDec')
 
         # test that an exception is raised if you call one of the
@@ -513,14 +503,14 @@ class PixelCoordTest(unittest.TestCase):
             pixelCoordsFromRaDec(raList, decList,
                                  camera=self.camera, epoch=2000.0)
         self.assertEqual(context.exception.message,
-                         'You need to pass an ObservationMetaData into ' \
+                         'You need to pass an ObservationMetaData into '
                          + 'pixelCoordsFromRaDec')
 
         with self.assertRaises(RuntimeError) as context:
             _pixelCoordsFromRaDec(raList, decList,
                                   camera=self.camera, epoch=2000.0)
         self.assertEqual(context.exception.message,
-                         'You need to pass an ObservationMetaData into ' \
+                         'You need to pass an ObservationMetaData into '
                          + 'pixelCoordsFromRaDec')
 
         # test that an exception is raised if you try to use an
@@ -534,7 +524,7 @@ class PixelCoordTest(unittest.TestCase):
                                  epoch=2000.0,
                                  obs_metadata=obsDummy)
         self.assertEqual(context.exception.message,
-                         'You need to pass an ObservationMetaData ' \
+                         'You need to pass an ObservationMetaData '
                          + 'with an mjd into pixelCoordsFromRaDec')
 
         with self.assertRaises(RuntimeError) as context:
@@ -543,7 +533,7 @@ class PixelCoordTest(unittest.TestCase):
                                   epoch=2000.0,
                                   obs_metadata=obsDummy)
         self.assertEqual(context.exception.message,
-                         'You need to pass an ObservationMetaData ' \
+                         'You need to pass an ObservationMetaData '
                          + 'with an mjd into pixelCoordsFromRaDec')
 
         # test that an exception is raised if you try to use an
@@ -557,7 +547,7 @@ class PixelCoordTest(unittest.TestCase):
                                  epoch=2000.0,
                                  obs_metadata=obsDummy)
         self.assertEqual(context.exception.message,
-                         'You need to pass an ObservationMetaData ' \
+                         'You need to pass an ObservationMetaData '
                          + 'with a rotSkyPos into pixelCoordsFromRaDec')
 
         obsDummy = ObservationMetaData(pointingRA=25.0,
@@ -569,9 +559,8 @@ class PixelCoordTest(unittest.TestCase):
                                   epoch=2000.0,
                                   obs_metadata=obsDummy)
         self.assertEqual(context.exception.message,
-                         'You need to pass an ObservationMetaData ' \
+                         'You need to pass an ObservationMetaData '
                          + 'with a rotSkyPos into pixelCoordsFromRaDec')
-
 
     def testResults(self):
         """
@@ -591,7 +580,7 @@ class PixelCoordTest(unittest.TestCase):
         arcsecPerPixel = 0.02
         arcsecPerMicron = 0.002
 
-        #list a bunch of detector centers in radians
+        # list a bunch of detector centers in radians
         x22 = 0.0
         y22 = 0.0
 
@@ -653,7 +642,6 @@ class PixelCoordTest(unittest.TestCase):
         numpy.testing.assert_array_almost_equal(xPixTest, xPixControl, 2)
         numpy.testing.assert_array_almost_equal(yPixTest, yPixControl, 2)
 
-
     def testOffChipResults(self):
         """
         Test that the results of the pixelCoords methods make sense in the case
@@ -676,7 +664,7 @@ class PixelCoordTest(unittest.TestCase):
         arcsecPerPixel = 0.02
         arcsecPerMicron = 0.002
 
-        #list a bunch of detector centers in radians
+        # list a bunch of detector centers in radians
         x22 = 0.0
         y22 = 0.0
 
@@ -735,8 +723,6 @@ class PixelCoordTest(unittest.TestCase):
 
         numpy.testing.assert_array_almost_equal(xPixTest, xPixControl, 2)
         numpy.testing.assert_array_almost_equal(yPixTest, yPixControl, 2)
-
-
 
     def testNaN(self):
         """
@@ -817,8 +803,6 @@ class PixelCoordTest(unittest.TestCase):
                     self.assertIsNotNone(xx, None)
                     self.assertIsNotNone(yy, None)
 
-
-
     def testDistortion(self):
         """
         Make sure that the results from pixelCoordsFromPupilCoords are different
@@ -843,7 +827,6 @@ class PixelCoordTest(unittest.TestCase):
             numpy.testing.assert_array_almost_equal(yu, yd, 4)
 
 
-
 class FocalPlaneCoordTest(unittest.TestCase):
 
     @classmethod
@@ -854,7 +837,6 @@ class FocalPlaneCoordTest(unittest.TestCase):
 
     def setUp(self):
         numpy.random.seed(8374522)
-
 
     def testConsistency(self):
         """
@@ -903,7 +885,6 @@ class FocalPlaneCoordTest(unittest.TestCase):
             self.assertFalse(numpy.isnan(y))
             self.assertFalse(y is None)
 
-
     def testExceptions(self):
         """
         Test that the focalPlaneCoord methods raise the exceptions
@@ -927,7 +908,7 @@ class FocalPlaneCoordTest(unittest.TestCase):
         with self.assertRaises(RuntimeError) as context:
             xf, yf = focalPlaneCoordsFromPupilCoords(xPupList, yPupList)
         self.assertEqual(context.exception.message,
-                         "You cannot calculate focal plane coordinates " \
+                         "You cannot calculate focal plane coordinates "
                          + "without specifying a camera")
 
         with self.assertRaises(RuntimeError) as context:
@@ -935,7 +916,7 @@ class FocalPlaneCoordTest(unittest.TestCase):
                                                obs_metadata=obs,
                                                epoch=2000.0)
         self.assertEqual(context.exception.message,
-                         "You cannot calculate focal plane coordinates " \
+                         "You cannot calculate focal plane coordinates "
                          + "without specifying a camera")
 
         with self.assertRaises(RuntimeError) as context:
@@ -943,9 +924,8 @@ class FocalPlaneCoordTest(unittest.TestCase):
                                                 obs_metadata=obs,
                                                 epoch=2000.0)
         self.assertEqual(context.exception.message,
-                         "You cannot calculate focal plane coordinates " \
+                         "You cannot calculate focal plane coordinates "
                          + "without specifying a camera")
-
 
         # test that an error is raised when you pass in something that
         # is not a numpy array
@@ -953,16 +933,15 @@ class FocalPlaneCoordTest(unittest.TestCase):
             xf, yf = focalPlaneCoordsFromPupilCoords(list(xPupList), yPupList,
                                                      camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You must pass numpy arrays of xPupil and yPupil " \
-                         +"to focalPlaneCoordsFromPupilCoords")
+                         "You must pass numpy arrays of xPupil and yPupil "
+                         + "to focalPlaneCoordsFromPupilCoords")
 
         with self.assertRaises(RuntimeError) as context:
             xf, yf = focalPlaneCoordsFromPupilCoords(xPupList, list(yPupList),
                                                      camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You must pass numpy arrays of xPupil and yPupil " \
-                         +"to focalPlaneCoordsFromPupilCoords")
-
+                         "You must pass numpy arrays of xPupil and yPupil "
+                         + "to focalPlaneCoordsFromPupilCoords")
 
         with self.assertRaises(RuntimeError) as context:
             xf, yf = _focalPlaneCoordsFromRaDec(list(raList), decList,
@@ -970,7 +949,7 @@ class FocalPlaneCoordTest(unittest.TestCase):
                                                 epoch=2000.0,
                                                 camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You must pass numpy arrays of RA and Dec to " \
+                         "You must pass numpy arrays of RA and Dec to "
                          + "focalPlaneCoordsFromRaDec")
 
         with self.assertRaises(RuntimeError) as context:
@@ -979,7 +958,7 @@ class FocalPlaneCoordTest(unittest.TestCase):
                                                 epoch=2000.0,
                                                 camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You must pass numpy arrays of RA and Dec to " \
+                         "You must pass numpy arrays of RA and Dec to "
                          + "focalPlaneCoordsFromRaDec")
         # we do not have to run the test above on focalPlaneCoordsFromRaDec
         # because the conversion to radians automatically casts lists into
@@ -991,7 +970,7 @@ class FocalPlaneCoordTest(unittest.TestCase):
             xf, yf = focalPlaneCoordsFromPupilCoords(xPupList, yPupList[0:4],
                                                      camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You specified 10 xPupil and 4 yPupil coordinates " \
+                         "You specified 10 xPupil and 4 yPupil coordinates "
                          + "in focalPlaneCoordsFromPupilCoords")
 
         with self.assertRaises(RuntimeError) as context:
@@ -1000,7 +979,7 @@ class FocalPlaneCoordTest(unittest.TestCase):
                                                epoch=2000.0,
                                                camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You specified 10 RAs and 4 Decs in " \
+                         "You specified 10 RAs and 4 Decs in "
                          + "focalPlaneCoordsFromRaDec")
 
         with self.assertRaises(RuntimeError) as context:
@@ -1009,9 +988,8 @@ class FocalPlaneCoordTest(unittest.TestCase):
                                                 epoch=2000.0,
                                                 camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You specified 10 RAs and 4 Decs in " \
+                         "You specified 10 RAs and 4 Decs in "
                          + "focalPlaneCoordsFromRaDec")
-
 
         # test that an error is raised if you call
         # focalPlaneCoordsFromRaDec without an epoch
@@ -1020,7 +998,7 @@ class FocalPlaneCoordTest(unittest.TestCase):
                                                obs_metadata=obs,
                                                camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You have to specify an epoch to run " \
+                         "You have to specify an epoch to run "
                          + "focalPlaneCoordsFromRaDec")
 
         with self.assertRaises(RuntimeError) as context:
@@ -1028,9 +1006,8 @@ class FocalPlaneCoordTest(unittest.TestCase):
                                                 obs_metadata=obs,
                                                 camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You have to specify an epoch to run " \
+                         "You have to specify an epoch to run "
                          + "focalPlaneCoordsFromRaDec")
-
 
         # test that an error is raised if you call
         # focalPlaneCoordsFromRaDec without an ObservationMetaData
@@ -1039,7 +1016,7 @@ class FocalPlaneCoordTest(unittest.TestCase):
                                                epoch=2000.0,
                                                camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You have to specify an ObservationMetaData to run " \
+                         "You have to specify an ObservationMetaData to run "
                          + "focalPlaneCoordsFromRaDec")
 
         with self.assertRaises(RuntimeError) as context:
@@ -1047,9 +1024,8 @@ class FocalPlaneCoordTest(unittest.TestCase):
                                                 epoch=2000.0,
                                                 camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You have to specify an ObservationMetaData to run " \
+                         "You have to specify an ObservationMetaData to run "
                          + "focalPlaneCoordsFromRaDec")
-
 
         # test that an error is raised if you pass an ObservationMetaData
         # without an mjd into focalPlaneCoordsFromRaDec
@@ -1061,7 +1037,7 @@ class FocalPlaneCoordTest(unittest.TestCase):
                                                epoch=2000.0,
                                                camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You need to pass an ObservationMetaData with an " \
+                         "You need to pass an ObservationMetaData with an "
                          + "mjd into focalPlaneCoordsFromRaDec")
 
         with self.assertRaises(RuntimeError) as context:
@@ -1070,7 +1046,7 @@ class FocalPlaneCoordTest(unittest.TestCase):
                                                 epoch=2000.0,
                                                 camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You need to pass an ObservationMetaData with an " \
+                         "You need to pass an ObservationMetaData with an "
                          + "mjd into focalPlaneCoordsFromRaDec")
 
         # test that an error is raised if you pass an ObservationMetaData
@@ -1083,7 +1059,7 @@ class FocalPlaneCoordTest(unittest.TestCase):
                                                epoch=2000.0,
                                                camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You need to pass an ObservationMetaData with a " \
+                         "You need to pass an ObservationMetaData with a "
                          + "rotSkyPos into focalPlaneCoordsFromRaDec")
 
         with self.assertRaises(RuntimeError) as context:
@@ -1092,9 +1068,8 @@ class FocalPlaneCoordTest(unittest.TestCase):
                                                 epoch=2000.0,
                                                 camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You need to pass an ObservationMetaData with a " \
+                         "You need to pass an ObservationMetaData with a "
                          + "rotSkyPos into focalPlaneCoordsFromRaDec")
-
 
     def testResults(self):
         """
@@ -1117,7 +1092,7 @@ class FocalPlaneCoordTest(unittest.TestCase):
         arcsecPerMicron = 0.002
         mmPerArcsec = 0.5
 
-        #list a bunch of detector centers in radians
+        # list a bunch of detector centers in radians
         x22 = 0.0
         y22 = 0.0
 
@@ -1194,9 +1169,8 @@ class ConversionFromPixelTest(unittest.TestCase):
         with self.assertRaises(RuntimeError) as context:
             xPupTest, yPupTest = pupilCoordsFromPixelCoords(xPix, yPix, chipNameList)
         self.assertEqual(context.exception.message,
-                         "You cannot call pupilCoordsFromPixelCoords without specifying " \
+                         "You cannot call pupilCoordsFromPixelCoords without specifying "
                          + "a camera")
-
 
     def testPupCoordsResults(self):
         """
@@ -1238,7 +1212,6 @@ class ConversionFromPixelTest(unittest.TestCase):
         xPupTest, yPupTest = pupilCoordsFromPixelCoords(xPix, yPix, chipNameList, camera=self.camera)
         self.assertTrue(numpy.isnan(xPupTest[5]))
         self.assertTrue(numpy.isnan(yPupTest[5]))
-
 
     def testRaDecExceptions(self):
         """
@@ -1313,7 +1286,6 @@ class ConversionFromPixelTest(unittest.TestCase):
         self.assertEqual(context.exception.message,
                          "The ObservationMetaData in raDecFromPixelCoords must have an mjd")
 
-
         # test that an error is raised if you pass in an ObservationMetaData
         # without a rotSkyPos
         obsDummy = ObservationMetaData(pointingRA=ra0, pointingDec=dec0, mjd=43243.0)
@@ -1330,7 +1302,6 @@ class ConversionFromPixelTest(unittest.TestCase):
                                             epoch=2000.0, camera=self.camera)
         self.assertEqual(context.exception.message,
                          "The ObservationMetaData in raDecFromPixelCoords must have a rotSkyPos")
-
 
         # test that an error is raised if you pass in lists of pixel coordinates,
         # rather than numpy arrays
@@ -1366,21 +1337,20 @@ class ConversionFromPixelTest(unittest.TestCase):
         self.assertEqual(context.exception.message,
                          "You must pass numpy arrays of xPix and yPix to raDecFromPixelCoords")
 
-
         # test that an error is raised if you pass in mismatched lists of
         # xPix and yPix
         with self.assertRaises(RuntimeError) as context:
             ra, dec = raDecFromPixelCoords(xPixList, yPixList[0:13], chipNameList,
                                            obs_metadata=obs, epoch=2000.0, camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You passed 20 xPix coordinates but 13 yPix coordinates "\
+                         "You passed 20 xPix coordinates but 13 yPix coordinates "
                          + "to raDecFromPixelCoords")
 
         with self.assertRaises(RuntimeError) as context:
             ra, dec = _raDecFromPixelCoords(xPixList, yPixList[0:13], chipNameList,
                                             obs_metadata=obs, epoch=2000.0, camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You passed 20 xPix coordinates but 13 yPix coordinates "\
+                         "You passed 20 xPix coordinates but 13 yPix coordinates "
                          + "to raDecFromPixelCoords")
 
         # test that an error is raised if you do not pass in the same number of chipNames
@@ -1389,16 +1359,15 @@ class ConversionFromPixelTest(unittest.TestCase):
             ra, dec = raDecFromPixelCoords(xPixList, yPixList, ['Det22']*22,
                                            obs_metadata=obs, epoch=2000.0, camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You passed 20 pixel coordinate pairs but 22 chip names to "\
+                         "You passed 20 pixel coordinate pairs but 22 chip names to "
                          + "raDecFromPixelCoords")
 
         with self.assertRaises(RuntimeError) as context:
             ra, dec = _raDecFromPixelCoords(xPixList, yPixList, ['Det22']*22,
                                             obs_metadata=obs, epoch=2000.0, camera=self.camera)
         self.assertEqual(context.exception.message,
-                         "You passed 20 pixel coordinate pairs but 22 chip names to "\
+                         "You passed 20 pixel coordinate pairs but 22 chip names to "
                          + "raDecFromPixelCoords")
-
 
     def testResults(self):
         """
@@ -1423,11 +1392,9 @@ class ConversionFromPixelTest(unittest.TestCase):
                                                  epoch=2000.0, camera=self.camera,
                                                  includeDistortion=includeDistortion)
 
-
             raRad, decRad = _raDecFromPixelCoords(xPixList, yPixList, chipNameList, obs_metadata=obs,
                                                   epoch=2000.0, camera=self.camera,
                                                   includeDistortion=includeDistortion)
-
 
             # first, make sure that the radians and degrees methods agree with each other
             dRa = arcsecFromRadians(raRad-numpy.radians(raDeg))
@@ -1443,13 +1410,12 @@ class ConversionFromPixelTest(unittest.TestCase):
                                                       epoch=2000.0, camera=self.camera,
                                                       includeDistortion=includeDistortion)
 
-
-            distance = numpy.sqrt(numpy.power(xPixTest-xPixList,2)+numpy.power(yPixTest-yPixList,2))
-            self.assertLess(distance.max(),0.2) # because of the imprecision in _icrsFromObserved, this is the best
-                                                # we can get; note that, in our test camera, each pixel is 10 microns
-                                                # in size and the plate scale is 2 arcsec per mm, so 0.2 pixels is
-                                                # 0.004 arcsec
-
+            distance = numpy.sqrt(numpy.power(xPixTest-xPixList, 2)+numpy.power(yPixTest-yPixList, 2))
+            # because of the imprecision in _icrsFromObserved, this is the best
+            self.assertLess(distance.max(), 0.2)
+            # we can get; note that, in our test camera, each pixel is 10 microns
+            # in size and the plate scale is 2 arcsec per mm, so 0.2 pixels is
+            # 0.004 arcsec
 
     def testResultsOffChip(self):
         """
@@ -1478,11 +1444,9 @@ class ConversionFromPixelTest(unittest.TestCase):
                                                  epoch=2000.0, camera=self.camera,
                                                  includeDistortion=includeDistortion)
 
-
             raRad, decRad = _raDecFromPixelCoords(xPixList, yPixList, chipNameList, obs_metadata=obs,
                                                   epoch=2000.0, camera=self.camera,
                                                   includeDistortion=includeDistortion)
-
 
             # first, make sure that the radians and degrees methods agree with each other
             dRa = arcsecFromRadians(raRad-numpy.radians(raDeg))
@@ -1500,14 +1464,12 @@ class ConversionFromPixelTest(unittest.TestCase):
                                                       camera=self.camera,
                                                       includeDistortion=includeDistortion)
 
-
-            distance = numpy.sqrt(numpy.power(xPixTest-xPixList,2)+numpy.power(yPixTest-yPixList,2))
-            self.assertLess(distance.max(),0.2) # because of the imprecision in _icrsFromObserved, this is the best
-                                                # we can get; note that, in our test camera, each pixel is 10 microns
-                                                # in size and the plate scale is 2 arcsec per mm, so 0.2 pixels is
-                                                # 0.004 arcsec
-
-
+            distance = numpy.sqrt(numpy.power(xPixTest-xPixList, 2)+numpy.power(yPixTest-yPixList, 2))
+            # because of the imprecision in _icrsFromObserved, this is the best
+            self.assertLess(distance.max(), 0.2)
+            # we can get; note that, in our test camera, each pixel is 10 microns
+            # in size and the plate scale is 2 arcsec per mm, so 0.2 pixels is
+            # 0.004 arcsec
 
     def testDistortion(self):
         """
@@ -1538,8 +1500,6 @@ class ConversionFromPixelTest(unittest.TestCase):
             numpy.testing.assert_array_almost_equal(arcsecFromRadians(yu), arcsecFromRadians(yd), 4)
 
 
-
-
 def suite():
     utilsTests.init()
     suites = []
@@ -1549,8 +1509,9 @@ def suite():
     suites += unittest.makeSuite(ConversionFromPixelTest)
     return unittest.TestSuite(suites)
 
+
 def run(shouldExit=False):
-    utilsTests.run(suite(),shouldExit)
+    utilsTests.run(suite(), shouldExit)
 
 if __name__ == "__main__":
     run(True)

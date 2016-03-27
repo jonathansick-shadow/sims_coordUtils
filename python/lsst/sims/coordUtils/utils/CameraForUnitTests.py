@@ -20,16 +20,19 @@ from lsst.afw.cameraGeom import (DetectorConfig, CameraConfig, makeCameraFromCat
 
 __all__ = ["ReturnCamera"]
 
+
 def expandDetectorName(abbrevName):
     return abbrevName
+
 
 def detectorIdFromAbbrevName(abbrevName):
     """Compute detector ID from an abbreviated detector name of the form Rxy_Sxy_Ci
 
     value = digits in this order: ci+1 rx ry sx sy
     """
-    idNum=int(abbrevName[-2:])
+    idNum = int(abbrevName[-2:])
     return idNum
+
 
 def makeAmpTables(segmentsFile, gainFile):
     """
@@ -44,13 +47,13 @@ def makeAmpTables(segmentsFile, gainFile):
             gainDict[els[0]] = {'gain':float(els[1]), 'saturation':int(els[2])}
     """
     returnDict = {}
-    #TODO currently there is no linearity provided, but we should identify
-    #how to get this information.
-    linearityCoeffs = (0.,1.,0.,0.)
+    # TODO currently there is no linearity provided, but we should identify
+    # how to get this information.
+    linearityCoeffs = (0., 1., 0., 0.)
     linearityType = "Polynomial"
-    readoutMap = {'LL':afwTable.LL, 'LR':afwTable.LR, 'UR':afwTable.UR, 'UL':afwTable.UL}
+    readoutMap = {'LL': afwTable.LL, 'LR': afwTable.LR, 'UR': afwTable.UR, 'UL': afwTable.UL}
     ampCatalog = None
-    detectorName = [] # set to a value that is an invalid dict key, to catch bugs
+    detectorName = []  # set to a value that is an invalid dict key, to catch bugs
     correctY0 = False
     with open(segmentsFile) as fh:
         for l in fh:
@@ -65,7 +68,7 @@ def makeAmpTables(segmentsFile, gainFile):
                 numy = int(els[2])
                 schema = afwTable.AmpInfoTable.makeMinimalSchema()
                 ampCatalog = afwTable.AmpInfoCatalog(schema)
-                if len(els[0].split('_')) == 3:   #wavefront sensor
+                if len(els[0].split('_')) == 3:  # wavefront sensor
                     correctY0 = True
                 else:
                     correctY0 = False
@@ -73,14 +76,14 @@ def makeAmpTables(segmentsFile, gainFile):
             record = ampCatalog.addNew()
             name = els[0].split("_")[-1]
             name = '%s,%s'%(name[1], name[2])
-            #Because of the camera coordinate system, we choose an
-            #image coordinate system that requires a -90 rotation to get
-            #the correct pixel positions from the
-            #phosim segments file
+            # Because of the camera coordinate system, we choose an
+            # image coordinate system that requires a -90 rotation to get
+            # the correct pixel positions from the
+            # phosim segments file
             y0 = numy - 1 - int(els[2])
             y1 = numy - 1 - int(els[1])
-            #Another quirk of the phosim file is that one of the wavefront sensor
-            #chips has an offset of 2000 pix in y.  It's always the 'C1' chip.
+            # Another quirk of the phosim file is that one of the wavefront sensor
+            # chips has an offset of 2000 pix in y.  It's always the 'C1' chip.
             if correctY0:
                 if y0 > 0:
                     y1 -= y0
@@ -106,28 +109,32 @@ def makeAmpTables(segmentsFile, gainFile):
             else:
                 flipy = True
 
-            #Since the amps are stored in amp coordinates, the readout is the same
-            #for all amps
+            # Since the amps are stored in amp coordinates, the readout is the same
+            # for all amps
             readCorner = readoutMap['LL']
 
             ndatax = x1 - x0 + 1
             ndatay = y1 - y0 + 1
-            #Because in versions v3.3.2 and earlier there was no overscan, we use the extended register as the overscan region
+            # Because in versions v3.3.2 and earlier there was no overscan, we use the
+            # extended register as the overscan region
             prescan = 1
             hoverscan = 0
             extended = 4
             voverscan = 0
-            rawBBox = afwGeom.Box2I(afwGeom.Point2I(0,0), afwGeom.Extent2I(extended+ndatax+hoverscan, prescan+ndatay+voverscan))
+            rawBBox = afwGeom.Box2I(afwGeom.Point2I(0, 0), afwGeom.Extent2I(
+                extended+ndatax+hoverscan, prescan+ndatay+voverscan))
             rawDataBBox = afwGeom.Box2I(afwGeom.Point2I(extended, prescan), afwGeom.Extent2I(ndatax, ndatay))
-            rawHorizontalOverscanBBox = afwGeom.Box2I(afwGeom.Point2I(0, prescan), afwGeom.Extent2I(extended, ndatay))
-            rawVerticalOverscanBBox = afwGeom.Box2I(afwGeom.Point2I(extended, prescan+ndatay), afwGeom.Extent2I(ndatax, voverscan))
+            rawHorizontalOverscanBBox = afwGeom.Box2I(
+                afwGeom.Point2I(0, prescan), afwGeom.Extent2I(extended, ndatay))
+            rawVerticalOverscanBBox = afwGeom.Box2I(afwGeom.Point2I(
+                extended, prescan+ndatay), afwGeom.Extent2I(ndatax, voverscan))
             rawPrescanBBox = afwGeom.Box2I(afwGeom.Point2I(extended, 0), afwGeom.Extent2I(ndatax, prescan))
 
             extraRawX = extended + hoverscan
             extraRawY = prescan + voverscan
             rawx0 = x0 + extraRawX*(x0//ndatax)
             rawy0 = y0 + extraRawY*(y0//ndatay)
-            #Set the elements of the record for this amp
+            # Set the elements of the record for this amp
             record.setBBox(bbox)
             record.setName(name)
             record.setReadoutCorner(readCorner)
@@ -148,6 +155,7 @@ def makeAmpTables(segmentsFile, gainFile):
     returnDict[detectorName] = ampCatalog
     return returnDict
 
+
 def makeLongName(shortName):
     """
     Make the long name from the PhoSim short name
@@ -157,12 +165,13 @@ def makeLongName(shortName):
     if len(parts) == 2:
         return " ".join(["%s:%s"%(el[0], ",".join(el[1:])) for el in parts])
     elif len(parts) == 3:
-        #This must be a wavefront sensor
-        wsPartMap = {'S':{'C0':'A', 'C1':'B'},
-                     'R':{'C0':'', 'C1':''}}
+        # This must be a wavefront sensor
+        wsPartMap = {'S': {'C0': 'A', 'C1': 'B'},
+                     'R': {'C0': '', 'C1': ''}}
         return " ".join(["%s:%s"%(el[0], ",".join(el[1:]+wsPartMap[el[0]][parts[-1]])) for el in parts[:-1]])
     else:
         raise ValueError("Could not parse %s: has %i parts"%(shortName, len(parts)))
+
 
 def makeDetectorConfigs(detectorLayoutFile, phosimVersion):
     """
@@ -175,7 +184,7 @@ def makeDetectorConfigs(detectorLayoutFile, phosimVersion):
     """
     detectorConfigs = []
     detType = SCIENCE
-    #We know we need to rotate 3 times and also apply the yaw perturbation
+    # We know we need to rotate 3 times and also apply the yaw perturbation
     nQuarter = 1
     with open(detectorLayoutFile) as fh:
         for l in fh:
@@ -213,6 +222,7 @@ def makeDetectorConfigs(detectorLayoutFile, phosimVersion):
             detectorConfigs.append(detConfig)
     return detectorConfigs
 
+
 def ReturnCamera(baseDir):
     """
     This method reads in the files
@@ -235,16 +245,16 @@ def ReturnCamera(baseDir):
     DetectorLayoutFile = os.path.join(baseDir, 'focalplanelayout.txt')
     SegmentsFile = os.path.join(baseDir, 'segmentation.txt')
     GainFile = None
-    phosimVersion='1.0'
+    phosimVersion = '1.0'
 
     ampTableDict = makeAmpTables(SegmentsFile, GainFile)
     detectorConfigList = makeDetectorConfigs(DetectorLayoutFile, phosimVersion)
 
-    #Build the camera config.
+    # Build the camera config.
     camConfig = CameraConfig()
-    camConfig.detectorList = dict([(i,detectorConfigList[i]) for i in xrange(len(detectorConfigList))])
+    camConfig.detectorList = dict([(i, detectorConfigList[i]) for i in xrange(len(detectorConfigList))])
     camConfig.name = 'LSST'
-    camConfig.plateScale = 2.0 #arcsec per mm
+    camConfig.plateScale = 2.0  # arcsec per mm
     pScaleRad = afwGeom.arcsecToRad(camConfig.plateScale)
     pincushion = 0.925
     # Don't have this yet ticket/3155
@@ -257,15 +267,15 @@ def ReturnCamera(baseDir):
     # According to Dave M. the simulated LSST transform is well approximated (1/3 pix)
     # by a scale and a pincusion.
 
-    #this is ultimately used to convert from focal plane coordinates to pupil coordinates
-    #see the asgnment below to tmc.transforms
+    # this is ultimately used to convert from focal plane coordinates to pupil coordinates
+    # see the asgnment below to tmc.transforms
     tConfig.transform.active.transform.coeffs = [0., 1./pScaleRad, 0., pincushion/pScaleRad]
 
     #tConfig.transform.active.boresiteOffset_x = camConfig.boresiteOffset_x
     #tConfig.transform.active.boresiteOffset_y = camConfig.boresiteOffset_y
     tmc = afwGeom.TransformMapConfig()
     tmc.nativeSys = FOCAL_PLANE.getSysName()
-    tmc.transforms = {PUPIL.getSysName():tConfig}
+    tmc.transforms = {PUPIL.getSysName(): tConfig}
     camConfig.transformDict = tmc
 
     myCamera = makeCameraFromCatalogs(camConfig, ampTableDict)
